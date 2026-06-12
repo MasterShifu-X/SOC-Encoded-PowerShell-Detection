@@ -216,7 +216,14 @@ EventCode=1
 
 ---
 
-
 ## ⭐ Key Takeaway
 
 This project demonstrates how SIEM, SOAR, Threat Intelligence, and AI-assisted triage can be integrated into a single workflow to improve SOC visibility and accelerate incident investigation.
+
+---
+
+## Disclaimer
+
+This project was developed in a controlled lab environment for educational and defensive security purposes only.
+
+The phishing website and BAT file were created solely to simulate adversary behavior and validate detection and response workflows.
