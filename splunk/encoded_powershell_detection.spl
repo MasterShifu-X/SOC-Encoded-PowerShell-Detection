@@ -1,1 +1,6 @@
-
+index="mastershifu-ai"
+source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+EventCode=1
+(Image="*\\powershell.exe" OR Image="*\\pwsh.exe")
+(CommandLine="*-enc*" OR CommandLine="*-e *" OR CommandLine="*-EncodedCommand*")
+| table _time, ComputerName, User, CommandLine, ParentImage
