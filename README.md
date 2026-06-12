@@ -18,6 +18,22 @@ The objective is to simulate a realistic phishing attack chain and automate the 
 
 ---
 
+## Lab Environment
+
+| Component | Technology |
+|------------|------------|
+| SIEM | Splunk Enterprise |
+| Endpoint Monitoring | Sysmon |
+| Log Forwarding | Splunk Universal Forwarder |
+| SOAR | n8n |
+| Threat Intelligence | VirusTotal |
+| AI Triage | Gemini AI |
+| Notification | Telegram |
+| Server OS | Ubuntu Server 24.04 |
+| Endpoint OS | Windows 11 |
+
+---
+
 ## 🎯 Objectives
 
 * Simulate a phishing-based attack scenario
