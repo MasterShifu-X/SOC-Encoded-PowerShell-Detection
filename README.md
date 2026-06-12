@@ -200,16 +200,6 @@ EventCode=1
 
 ---
 
-## 🚀 Future Improvements
-
-* Add AbuseIPDB integration for IP reputation checks
-* Implement additional PowerShell detection rules
-* Add Sigma rule support
-* Integrate multiple threat intelligence sources
-* Add analyst case management workflow
-* Support automated incident ticket creation
-
----
 
 ## ⭐ Key Takeaway
 
