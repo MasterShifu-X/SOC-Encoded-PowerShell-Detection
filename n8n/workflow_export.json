@@ -1,0 +1,253 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "splunk-alert",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -272,
+        0
+      ],
+      "id": "294ee676-a727-4a1d-ae25-e84c64050a9b",
+      "name": "Webhook",
+      "webhookId": "a594429a-85d3-44b1-a4c8-955bb3d330ec"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "89add49b-6167-4145-ae4d-688eaf099f8f",
+              "name": "host",
+              "value": "={{$json.body.result.host}}",
+              "type": "string"
+            },
+            {
+              "id": "1b5fb348-1566-4274-8bea-79e7695873cd",
+              "name": "user",
+              "value": "={{$json.body.result.user}}",
+              "type": "string"
+            },
+            {
+              "id": "cd2a1ade-e2cf-4798-ac01-12aecf1c56e3",
+              "name": "process",
+              "value": "={{$json.body.result.process_name}}",
+              "type": "string"
+            },
+            {
+              "id": "07654fa3-47c4-43be-b262-b736f58ae480",
+              "name": "sha256",
+              "value": "={{$json.body.result.SHA256}}",
+              "type": "string"
+            },
+            {
+              "id": "965a4978-df97-4b5a-856b-9e9965c866d6",
+              "name": "command",
+              "value": "={{$json.body.result.CommandLine}}",
+              "type": "string"
+            },
+            {
+              "id": "33fa76aa-2d75-4eae-8739-20cbf3c0dfeb",
+              "name": "time",
+              "value": "=time {{$json.body.result.UtcTime}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -32,
+        0
+      ],
+      "id": "472a0e8b-bbe3-4c87-8b8b-375bcad3632d",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        336,
+        -176
+      ],
+      "id": "4b16e08e-c68d-4e31-9a44-deda0cb391b2",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "url": "=https://www.virustotal.com/api/v3/files/{{$json.sha256}}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "virusTotalApi",
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "6d000872-600e-4d74-8c5e-b8a2ab8f1a83",
+      "name": "Virus Total",
+      "credentials": {
+        "virusTotalApi": {
+          "id": "24cyYpFY2nOVtUAh",
+          "name": "VirusTotal account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a Tier 2 SOC Analyst performing initial incident triage.\n\nAnalyze the following security event and provide a concise analyst summary suitable for a Telegram SOC alert.\n\nHost: {{$json.host}}\nUser: {{$json.user}}\nProcess: {{$json.process}}\nCommand Line: {{$json.command}}\nSHA256: {{$json.sha256}}\n\nVirusTotal:\nMalicious: {{$json.data.attributes.last_analysis_stats.malicious}}\nSuspicious: {{$json.data.attributes.last_analysis_stats.suspicious}}\nReputation: {{$json.data.attributes.reputation}}\n\nANALYSIS RULES:\n\n* Base conclusions only on the evidence provided.\n* Do not assume malicious intent without evidence.\n* If the command is encoded or obfuscated, state that payload analysis is required.\n* Do not speculate about attacker objectives.\n* Avoid recommending disruptive actions unless there is evidence of malicious activity.\n* Do not recommend immediate host isolation unless evidence of malicious activity exists.\n* Do not recommend disabling user accounts unless evidence of compromise exists.\n* Prefer monitoring, validation, and escalation actions when evidence is inconclusive.\n* Keep the response concise and actionable.\n* Do not mention severity.\n* Do not mention confidence scores.\n\nOUTPUT RULES:\n\n* Output plain text only.\n* Do NOT use Markdown.\n* Do NOT use HTML.\n* Do NOT use hyperlinks.\n* Keep the response under 700 characters.\n* Follow the output format exactly.\n* Every Investigation item MUST start with \"- \".\n* Every Containment item MUST start with \"- \".\n* Do not use numbering.\n* Do not output blank bullet points.\n\nOUTPUT FORMAT:\n\nCommand Summary: <Short human-readable summary of the command. Do not include the full command line or Base64 payload.>\n\nMITRE ATT&CK:\nTechnique: <Technique ID> - <Technique Name>\nTactic: <Tactic>\n\nAssessment:\n<Maximum 2 concise sentences>\n\nInvestigation:\n\n<Step 1>\n<Step 2>\n<Step 3>\n\nContainment:\n\n<Action 1>\n<Action 2>\n<Action 3>\n\nIMPORTANT:\n\nUse numbered lists exactly as shown.\nDo not use bullet points.\nDo not use paragraphs in Investigation or Containment.\nEach item must start with its number.\nFollow the output format exactly.\n"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        512,
+        -176
+      ],
+      "id": "0f186351-cc51-4af3-97f9-5617bfd5ecd1",
+      "name": "Gemini Triage",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Wl3PrxLMgVwI3qcW",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "7846606431",
+        "text": "=🚨 SOC ALERT 🚨 \n\n🖥 Host:\n{{$('Merge').item.json.host}}\n\n👤 User:\n{{$('Merge').item.json.user}}\n\n💻 Process:\n{{$('Merge').item.json.process}}\n\n🦠 VirusTotal:\n* Malicious: {{$('Merge').item.json.data.attributes.last_analysis_stats.malicious}}\n* Suspicious: {{$('Merge').item.json.data.attributes.last_analysis_stats.suspicious}}\n\n🤖 AI Analysis:\n{{$json.content.parts[0].text}}\n\n⏰ Time:\n{{$('Merge').item.json.time}}\n",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        864,
+        -176
+      ],
+      "id": "c5eb7ac1-f1db-4640-bde5-9185ade533e3",
+      "name": "Telegram Alert",
+      "webhookId": "cbee0c44-9f14-4679-84ea-cf481307f594",
+      "credentials": {
+        "telegramApi": {
+          "id": "8x43XBUq2tHRKF6S",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Virus Total",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Gemini Triage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Virus Total": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Gemini Triage": {
+      "main": [
+        [
+          {
+            "node": "Telegram Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Alert": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "c99b90fb-99e3-4541-bd7a-a6f8e1068a25",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bfc2bf4e8b96ccff123acf2bd5d06f6c0b46b4bbea378bccd096164c64c439d3"
+  },
+  "id": "OMjSPopMCZUDpezG",
+  "tags": []
+}
